@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'e-commerce-2303.firebaseapp.com',
     storageBucket: 'e-commerce-2303.firebasestorage.app',
   );
+
 }

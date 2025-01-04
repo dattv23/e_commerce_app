@@ -1,9 +1,10 @@
-import 'package:flutter/gestures.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:e_commerce_app/screens/auth/views/components/sign_up_form.dart';
+import 'package:flutter/gestures.dart';
 import 'package:e_commerce_app/route/route_constants.dart';
 
 import '../../../constants.dart';
+import 'components/sign_up_form.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -14,6 +15,37 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isAgreeChecked = false; // State to track checkbox status
+
+  Future<void> _signUp() async {
+    if (_formKey.currentState!.validate() && _isAgreeChecked) {
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+        Navigator.pushNamed(context, entryPointScreenRoute);
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        if (e.code == 'email-already-in-use') {
+          errorMessage = 'The email is already in use.';
+        } else if (e.code == 'weak-password') {
+          errorMessage = 'The password is too weak.';
+        } else {
+          errorMessage = 'An error occurred: ${e.message}';
+        }
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    } else if (!_isAgreeChecked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Please agree to the terms and privacy policy.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +73,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     "Please enter your valid data in order to create an account.",
                   ),
                   const SizedBox(height: defaultPadding),
-                  SignUpForm(formKey: _formKey),
+                  SignUpForm(
+                    formKey: _formKey,
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                  ),
                   const SizedBox(height: defaultPadding),
                   Row(
                     children: [
                       Checkbox(
-                        onChanged: (value) {},
-                        value: false,
+                        value: _isAgreeChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            _isAgreeChecked = value!;
+                          });
+                        },
                       ),
                       Expanded(
                         child: Text.rich(
@@ -72,17 +112,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                   const SizedBox(height: defaultPadding * 2),
                   ElevatedButton(
-                    onPressed: () {
-                      // There is 2 more screens while user complete their profile
-                      // afre sign up, it's available on the pro version get it now
-                      // 🔗 https://theflutterway.gumroad.com/l/fluttershop
-                      Navigator.pushNamed(context, entryPointScreenRoute);
-                    },
+                    onPressed: _isAgreeChecked
+                        ? _signUp
+                        : null, // Disable if unchecked
                     child: const Text("Continue"),
                   ),
                   Row(
