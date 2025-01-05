@@ -10,15 +10,13 @@ class SecondaryProductCard extends StatelessWidget {
     required this.brandName,
     required this.title,
     required this.price,
-    this.priceAfetDiscount,
-    this.dicountpercent,
+    required this.discountPercent,
     this.press,
     this.style,
   });
   final String image, brandName, title;
   final double price;
-  final double? priceAfetDiscount;
-  final int? dicountpercent;
+  final int discountPercent;
   final VoidCallback? press;
 
   final ButtonStyle? style;
@@ -39,7 +37,7 @@ class SecondaryProductCard extends StatelessWidget {
             child: Stack(
               children: [
                 NetworkImageWithLoader(image, radius: defaultBorderRadious),
-                if (dicountpercent != null)
+                if (discountPercent != 0)
                   Positioned(
                     right: defaultPadding / 2,
                     top: defaultPadding / 2,
@@ -53,7 +51,7 @@ class SecondaryProductCard extends StatelessWidget {
                             Radius.circular(defaultBorderRadious)),
                       ),
                       child: Text(
-                        "$dicountpercent% off",
+                        "$discountPercent% off",
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -89,11 +87,11 @@ class SecondaryProductCard extends StatelessWidget {
                         .copyWith(fontSize: 12),
                   ),
                   const Spacer(),
-                  priceAfetDiscount != null
+                  discountPercent != 0
                       ? Row(
                           children: [
                             Text(
-                              "\$$priceAfetDiscount",
+                              "\$${price - (discountPercent / 100) * price}",
                               style: const TextStyle(
                                 color: Color(0xFF31B0D8),
                                 fontWeight: FontWeight.w500,

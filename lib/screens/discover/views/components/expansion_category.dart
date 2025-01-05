@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:e_commerce_app/route/screen_export.dart';
 
 import '../../../../constants.dart';
 
 class ExpansionCategory extends StatelessWidget {
   const ExpansionCategory({
     super.key,
+    required this.slug,
     required this.title,
     required this.subCategory,
     required this.svgSrc,
   });
 
-  final String title, svgSrc;
+  final String slug, title, svgSrc;
   final List subCategory;
 
   @override
@@ -41,7 +41,8 @@ class ExpansionCategory extends StatelessWidget {
           children: [
             ListTile(
               onTap: () {
-                Navigator.pushNamed(context, onSaleScreenRoute);
+                Navigator.pushNamed(
+                    context, '/category/${subCategory[index].slug}');
               },
               title: Text(
                 subCategory[index].title,

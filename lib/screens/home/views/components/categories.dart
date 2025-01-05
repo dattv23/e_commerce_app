@@ -1,66 +1,67 @@
+import 'package:e_commerce_app/models/category_model.dart';
+import 'package:e_commerce_app/services/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:e_commerce_app/route/screen_export.dart';
 
 import '../../../../constants.dart';
 
-// For preview
-class CategoryModel {
-  final String name;
-  final String? svgSrc, route;
+class Categories extends StatefulWidget {
+  const Categories({super.key});
 
-  CategoryModel({
-    required this.name,
-    this.svgSrc,
-    this.route,
-  });
+  @override
+  _CategoriesState createState() => _CategoriesState();
 }
 
-List<CategoryModel> demoCategories = [
-  CategoryModel(name: "All Categories"),
-  CategoryModel(
-      name: "On Sale",
-      svgSrc: "assets/icons/Sale.svg",
-      route: onSaleScreenRoute),
-  CategoryModel(name: "Man's", svgSrc: "assets/icons/Man.svg"),
-  CategoryModel(name: "Woman’s", svgSrc: "assets/icons/Woman.svg"),
-  CategoryModel(
-      name: "Kids", svgSrc: "assets/icons/Child.svg", route: kidsScreenRoute),
-];
-// End For Preview
+class _CategoriesState extends State<Categories> {
+  late Future<List<CategoryModel>> _categoriesFuture;
 
-class Categories extends StatelessWidget {
-  const Categories({
-    super.key,
-  });
+  @override
+  void initState() {
+    super.initState();
+    _categoriesFuture = CategoryService().getCategories();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          ...List.generate(
-            demoCategories.length,
-            (index) => Padding(
-              padding: EdgeInsets.only(
-                  left: index == 0 ? defaultPadding : defaultPadding / 2,
-                  right:
-                      index == demoCategories.length - 1 ? defaultPadding : 0),
-              child: CategoryBtn(
-                category: demoCategories[index].name,
-                svgSrc: demoCategories[index].svgSrc,
-                isActive: index == 0,
-                press: () {
-                  if (demoCategories[index].route != null) {
-                    Navigator.pushNamed(context, demoCategories[index].route!);
-                  }
-                },
-              ),
+    return FutureBuilder<List<CategoryModel>>(
+      future: _categoriesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(child: Text('Error loading categories'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No categories available'));
+        } else {
+          final categories = snapshot.data!;
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ...List.generate(
+                  categories.length,
+                  (index) => Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? defaultPadding : defaultPadding / 2,
+                      right:
+                          index == categories.length - 1 ? defaultPadding : 0,
+                    ),
+                    child: CategoryBtn(
+                      category: categories[index].title,
+                      svgSrc: categories[index].svgSrc,
+                      isActive: index == 0,
+                      press: () {
+                        Navigator.pushNamed(
+                            context, '/category/${categories[index].slug}');
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+          );
+        }
+      },
     );
   }
 }

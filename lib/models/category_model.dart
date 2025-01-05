@@ -1,59 +1,52 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class CategoryModel {
+  final String slug;
   final String title;
-  final String? image, svgSrc;
+  final String? image;
+  final String? svgSrc;
   final List<CategoryModel>? subCategories;
 
   CategoryModel({
+    required this.slug,
     required this.title,
     this.image,
     this.svgSrc,
     this.subCategories,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'slug': slug,
+      'title': title,
+      'image': image,
+      'svgSrc': svgSrc,
+      'subCategories':
+          subCategories?.map((category) => category.toMap()).toList(),
+    };
+  }
+
+  factory CategoryModel.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    List<CategoryModel>? subCats;
+
+    if (data['subCategories'] != null) {
+      subCats = (data['subCategories'] as List).map((subCat) {
+        return CategoryModel(
+          slug: subCat['slug'] ?? '',
+          title: subCat['title'] ?? '',
+          image: subCat['image'],
+          svgSrc: subCat['svgSrc'],
+        );
+      }).toList();
+    }
+
+    return CategoryModel(
+      slug: data['slug'] ?? '',
+      title: data['title'] ?? '',
+      image: data['image'],
+      svgSrc: data['svgSrc'],
+      subCategories: subCats,
+    );
+  }
 }
-
-final List<CategoryModel> demoCategoriesWithImage = [
-  CategoryModel(title: "Woman’s", image: "https://i.imgur.com/5M89G2P.png"),
-  CategoryModel(title: "Man’s", image: "https://i.imgur.com/UM3GdWg.png"),
-  CategoryModel(title: "Kid’s", image: "https://i.imgur.com/Lp0D6k5.png"),
-  CategoryModel(title: "Accessories", image: "https://i.imgur.com/3mSE5sN.png"),
-];
-
-final List<CategoryModel> demoCategories = [
-  CategoryModel(
-    title: "On sale",
-    svgSrc: "assets/icons/Sale.svg",
-    subCategories: [
-      CategoryModel(title: "All Clothing"),
-      CategoryModel(title: "New In"),
-      CategoryModel(title: "Coats & Jackets"),
-      CategoryModel(title: "Dresses"),
-      CategoryModel(title: "Jeans"),
-    ],
-  ),
-  CategoryModel(
-    title: "Man’s & Woman’s",
-    svgSrc: "assets/icons/Man&Woman.svg",
-    subCategories: [
-      CategoryModel(title: "All Clothing"),
-      CategoryModel(title: "New In"),
-      CategoryModel(title: "Coats & Jackets"),
-    ],
-  ),
-  CategoryModel(
-    title: "Kids",
-    svgSrc: "assets/icons/Child.svg",
-    subCategories: [
-      CategoryModel(title: "All Clothing"),
-      CategoryModel(title: "New In"),
-      CategoryModel(title: "Coats & Jackets"),
-    ],
-  ),
-  CategoryModel(
-    title: "Accessories",
-    svgSrc: "assets/icons/Accessories.svg",
-    subCategories: [
-      CategoryModel(title: "All Clothing"),
-      CategoryModel(title: "New In"),
-    ],
-  ),
-];

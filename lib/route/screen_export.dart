@@ -9,6 +9,8 @@ export '/screens/discover/views/discover_screen.dart';
 export '/screens/home/views/home_screen.dart';
 export '/screens/kids/views/kids_screen.dart';
 export '/screens/on_sale/views/on_sale_screen.dart';
+export '/screens/mans_womans/views/mans_womans_screen.dart';
+export '/screens/category_products/views/category_products_screen.dart';
 export '/screens/product/views/product_details_screen.dart';
 
 export '/screens/reviews/view/product_reviews_screen.dart';
