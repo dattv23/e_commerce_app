@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:e_commerce_app/components/network_image_with_loader.dart';
 
 import '../../../../constants.dart';
 
@@ -28,10 +27,9 @@ class ProfileCard extends StatelessWidget {
       onTap: press,
       leading: CircleAvatar(
         radius: 28,
-        child: NetworkImageWithLoader(
-          imageSrc,
-          radius: 100,
-        ),
+        backgroundImage: imageSrc.startsWith('http')
+            ? NetworkImage(imageSrc)
+            : AssetImage(imageSrc) as ImageProvider,
       ),
       title: Row(
         children: [

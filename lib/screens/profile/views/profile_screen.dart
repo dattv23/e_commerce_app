@@ -1,7 +1,8 @@
+import 'package:e_commerce_app/screens/profile/views/edit_profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:e_commerce_app/components/list_tile/divider_list_tile.dart';
-import 'package:e_commerce_app/components/network_image_with_loader.dart';
 import 'package:e_commerce_app/constants.dart';
 import 'package:e_commerce_app/route/screen_export.dart';
 
@@ -13,32 +14,35 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the current user
+    final User? user = FirebaseAuth.instance.currentUser;
+
+    // Default values in case user info is null
+    final String name = user?.displayName ?? "Guest User";
+    final String email = user?.email ?? "guest@example.com";
+    final String? photoUrl = user?.photoURL;
+
     return Scaffold(
       body: ListView(
         children: [
           ProfileCard(
-            name: "Sepide",
-            email: "theflutterway@gmail.com",
-            imageSrc: "https://i.imgur.com/IXnwbLk.png",
-            // proLableText: "Sliver",
-            // isPro: true, if the user is pro
+            name: name,
+            email: email,
+            imageSrc: photoUrl ?? 'assets/images/avatar_default.png',
             press: () {
-              Navigator.pushNamed(context, userInfoScreenRoute);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfileScreen(
+                    name: name,
+                    email: email,
+                    photoUrl: photoUrl,
+                  ),
+                ),
+              );
             },
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: defaultPadding, vertical: defaultPadding * 1.5),
-            child: GestureDetector(
-              onTap: () {},
-              child: const AspectRatio(
-                aspectRatio: 1.8,
-                child:
-                    NetworkImageWithLoader("https://i.imgur.com/dz0BBom.png"),
-              ),
-            ),
-          ),
-
+          // Other Profile Options
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
             child: Text(
@@ -156,7 +160,10 @@ class ProfileScreen extends StatelessWidget {
 
           // Log Out
           ListTile(
-            onTap: () {},
+            onTap: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacementNamed(context, logInScreenRoute);
+            },
             minLeadingWidth: 24,
             leading: SvgPicture.asset(
               "assets/icons/Logout.svg",
