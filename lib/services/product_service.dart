@@ -64,7 +64,13 @@ class ProductService with ChangeNotifier {
 
   Future<List<ProductModel>> fetchProductsByCategory(String slug) async {
     try {
-      QuerySnapshot snapshot = await _firestore.collection('products').get();
+      // Query Firestore for products where the category array contains the given slug
+      QuerySnapshot snapshot = await _firestore
+          .collection('products')
+          .where('category', arrayContains: slug)
+          .get();
+
+      // Map the Firestore documents to ProductModel instances
       return snapshot.docs
           .map((doc) => ProductModel.fromFirestore(doc))
           .toList();
