@@ -87,7 +87,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     case ordersScreenRoute:
       return MaterialPageRoute(
-        builder: (context) => const OrdersScreen(),
+        builder: (context) => OrdersScreen(),
       );
     case preferencesScreenRoute:
       return MaterialPageRoute(

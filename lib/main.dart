@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Import the provider package
 import 'package:e_commerce_app/route/route_constants.dart';
 import 'package:e_commerce_app/route/router.dart' as router;
 import 'package:e_commerce_app/theme/app_theme.dart';
@@ -6,6 +7,9 @@ import 'package:e_commerce_app/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+
+// Import your state management classes
+import 'package:e_commerce_app/providers/cart_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,13 +25,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Exclusive',
-      theme: AppTheme.lightTheme(context),
-      themeMode: ThemeMode.light,
-      onGenerateRoute: router.generateRoute,
-      initialRoute: _getInitialRoute(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Exclusive',
+        theme: AppTheme.lightTheme(context),
+        themeMode: ThemeMode.light,
+        onGenerateRoute: router.generateRoute,
+        initialRoute: _getInitialRoute(),
+      ),
     );
   }
 

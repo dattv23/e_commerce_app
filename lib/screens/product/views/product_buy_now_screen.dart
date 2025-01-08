@@ -1,3 +1,6 @@
+import 'package:e_commerce_app/models/product_model.dart';
+import 'package:e_commerce_app/providers/cart_provider.dart';
+import 'package:e_commerce_app/utils/calculateDiscountedPrice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:e_commerce_app/components/cart_button.dart';
@@ -7,6 +10,7 @@ import 'package:e_commerce_app/screens/product/views/added_to_cart_message_scree
 import 'package:e_commerce_app/screens/product/views/components/product_list_tile.dart';
 import 'package:e_commerce_app/screens/product/views/location_permission_store_availability_screen.dart';
 import 'package:e_commerce_app/screens/product/views/size_guide_screen.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants.dart';
 import 'components/product_quantity.dart';
@@ -15,21 +19,61 @@ import 'components/selected_size.dart';
 import 'components/unit_price.dart';
 
 class ProductBuyNowScreen extends StatefulWidget {
-  const ProductBuyNowScreen({super.key});
+  final ProductModel product;
+
+  const ProductBuyNowScreen({super.key, required this.product});
 
   @override
   _ProductBuyNowScreenState createState() => _ProductBuyNowScreenState();
 }
 
 class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
+  int _quantity = 1; // Initial quantity
+  int _selectedColorIndex = 0; // Default selected color index
+  int _selectedSizeIndex = 0; // Default selected size index
+
+  void _incrementQuantity() {
+    setState(() {
+      _quantity++;
+    });
+  }
+
+  void _decrementQuantity() {
+    if (_quantity > 1) {
+      setState(() {
+        _quantity--;
+      });
+    }
+  }
+
+  void _changeSelectedColor(int index) {
+    setState(() {
+      _selectedColorIndex = index;
+    });
+  }
+
+  void _changeSelectedSize(int index) {
+    setState(() {
+      _selectedSizeIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+
     return Scaffold(
       bottomNavigationBar: CartButton(
-        price: 269.4,
+        price: calculateDiscountedPrice(product.price, product.discountPercent),
         title: "Add to cart",
         subTitle: "Total price",
         press: () {
+          Provider.of<CartProvider>(context, listen: false).addItem(
+            product.id,
+            product.image,
+            product.title,
+            calculateDiscountedPrice(product.price, product.discountPercent),
+          );
           customModalBottomSheet(
             context,
             isDismissible: false,
@@ -47,7 +91,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
               children: [
                 const BackButton(),
                 Text(
-                  "Sleeveless Ruffle",
+                  product.title,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 IconButton(
@@ -61,12 +105,13 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
           Expanded(
             child: CustomScrollView(
               slivers: [
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: defaultPadding),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: defaultPadding),
                     child: AspectRatio(
                       aspectRatio: 1.05,
-                      child: NetworkImageWithLoader(productDemoImg1),
+                      child: NetworkImageWithLoader(product.image),
                     ),
                   ),
                 ),
@@ -76,16 +121,17 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: UnitPrice(
-                            price: 145,
-                            priceAfterDiscount: 134.7,
+                            price: product.price,
+                            priceAfterDiscount: calculateDiscountedPrice(
+                                product.price, product.discountPercent),
                           ),
                         ),
                         ProductQuantity(
-                          numOfItem: 2,
-                          onIncrement: () {},
-                          onDecrement: () {},
+                          numOfItem: _quantity,
+                          onIncrement: _incrementQuantity,
+                          onDecrement: _decrementQuantity,
                         ),
                       ],
                     ),
@@ -101,15 +147,15 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                       Color(0xFF9FE1DD),
                       Color(0xFFC482DB),
                     ],
-                    selectedColorIndex: 2,
-                    press: (value) {},
+                    selectedColorIndex: _selectedColorIndex,
+                    press: _changeSelectedColor,
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: SelectedSize(
                     sizes: const ["S", "M", "L", "XL", "XXL"],
-                    selectedIndex: 1,
-                    press: (value) {},
+                    selectedIndex: _selectedSizeIndex,
+                    press: _changeSelectedSize,
                   ),
                 ),
                 SliverPadding(

@@ -1,3 +1,4 @@
+import 'package:e_commerce_app/utils/calculateDiscountedPrice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:e_commerce_app/components/cart_button.dart';
@@ -111,13 +112,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: CartButton(
                       price: product.discountPercent == 0
                           ? product.price
-                          : (product.price -
-                              (product.discountPercent / 100) * product.price),
+                          : calculateDiscountedPrice(
+                              product.price, product.discountPercent),
                       press: () {
                         customModalBottomSheet(
                           context,
                           height: MediaQuery.of(context).size.height * 0.92,
-                          child: const ProductBuyNowScreen(),
+                          child: ProductBuyNowScreen(product: product),
                         );
                       },
                     ),
