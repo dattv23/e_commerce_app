@@ -149,15 +149,22 @@ class OrderCard extends StatelessWidget {
   }
 
   void _showCancelDialog(BuildContext context) {
+    final TextEditingController reasonController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Order'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Please select a reason for cancellation:'),
-            // Add your cancellation reason options here
+            const Text('Please enter a reason for cancellation:'),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                hintText: 'Cancellation reason',
+              ),
+            ),
           ],
         ),
         actions: [
@@ -166,9 +173,31 @@ class OrderCard extends StatelessWidget {
             child: const Text('Back'),
           ),
           ElevatedButton(
-            onPressed: () {
-              // Implement order cancellation
-              Navigator.pop(context);
+            onPressed: () async {
+              final reason = reasonController.text.trim();
+              if (reason.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please provide a reason')),
+                );
+                return;
+              }
+
+              try {
+                // Call the cancelOrder method from OrderService
+                final orderService = OrderService();
+                await orderService.cancelOrder(order.id, reason);
+
+                // Update the UI after cancellation
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Order cancelled successfully')),
+                );
+
+                Navigator.pop(context); // Close the dialog
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to cancel order: $e')),
+                );
+              }
             },
             child: const Text('Confirm Cancellation'),
           ),
